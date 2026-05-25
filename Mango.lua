@@ -1,4 +1,4 @@
---Mango233's Skin Lua
+--Mango233's Skin Lua 1
 --Lua by Mango233_QwQ (https://m.mugzone.net/accounts/user/1236961)
 function Init()
     --^^^^^ 皮肤初始化时被调用 ^^^^^
