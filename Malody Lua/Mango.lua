@@ -34,13 +34,9 @@ function Init()
     JudgeUI.Alpha = 0
 
     --====== 轨道缩放以及屏幕比例适配 ======
-    local sceneScale = Game:SceneScale() --获取轨道缩放
-    local width = Game:Width()            --获取游戏窗口宽度
-    if (width >= 1680) then
-        ratioWidth = 1
-    else
-        ratioWidth = width / 1680
-    end
+    local sceneScale = Game:SceneScale()            --获取轨道缩放
+    local width = Game:Width()                      --获取游戏窗口宽度
+    local ratioWidth = math.min(width / 1680, 1)    --虽然实际设计皮肤是在2560宽度下的 但是这个适配代码确实能跑 改也懒得改了还会出问题 算了不管了:(
 
     local timePos = Module:Find("time")
     local timePosFull = Module:Find("time-p")
@@ -55,13 +51,13 @@ function Init()
     timePosFull.X = timePos.X
     hpPos.X = -timePos.X
     hpPosFull.X = hpPos.X
-    namePos.X = -timePos.X + 5
+    namePos.X = hpPos.X + 5
     scorePos.X = namePos.X
     accPos.X = namePos.X
     lhPos.X = namePos.X + 312
 
     --====== 动画时间统一定义 ======
-    TIME = {  
+    TIME = {  --用于保证动画播放时长不受谱面倍速影响且方便统一管理
     OffsetShadows = math.floor(OffsetShadowsTimePlayer * Rate),
     OffsetT = math.floor(OffsetTTime * Rate),
     JudgeAlpha = math.floor(600 * Rate),
@@ -92,22 +88,22 @@ function Update()
     local remaining = StartTime - currentTime --计算剩余时间
 
     --====== 谱面播放倒计时 ======
-    if remaining > 0 then
-        if remaining > 1900 and CountdownDoAlpha then
-            CountdownDoAlpha = false
+    if remaining > 0 then                               --保证下列函数只会在倒计时>0s时触发
+        if remaining > 1900 and CountdownDoAlpha then   --如果倒计时>1.9s且由于重开触发了动画标签的话
+            CountdownDoAlpha = false                    --将动画标签设置为false
         end
-        if not CountdownDoAlpha then
-            CountdownText.Alpha = 100
+        if not CountdownDoAlpha then                    --如果没有触发动画标签的话
+            CountdownText.Alpha = 100                   --将倒计时不透明度始终设置为100
         end
-        local seconds = remaining / 1000 / Rate
-        CountdownText.Text = string.format("%.1fs", seconds)
-        if remaining <= 1900 and not CountdownDoAlpha then
-            CountdownDoAlpha = true
-            CountdownText:DoAlpha({start=currentTime,finish=currentTime+TIME.CountdownText,from=100,to=0})
+        local seconds = remaining / 1000 / Rate                 --获取倒计时
+        CountdownText.Text = string.format("%.1fs", seconds)    --显示倒计时
+        if remaining <= 1900 and not CountdownDoAlpha then      --当倒计时<1.9s且没有触发动画标签的话
+            CountdownDoAlpha = true                             --将动画标签设置为true
+            CountdownText:DoAlpha({start=currentTime,finish=currentTime+TIME.CountdownText,from=100,to=0})  --开始渐隐动画
         end
-    elseif remaining < 0 then
-        CountdownText.Alpha = 0
-        CountdownDoAlpha = false
+    elseif remaining < 0 then       --保证下列函数只会在倒计时<0时触发
+        CountdownText.Alpha = 0     --始终将倒计时不透明度设置为0
+        CountdownDoAlpha = false    --将动画标签设置为false
     end
 
 end
@@ -123,9 +119,9 @@ function OnHit()
     --====== 偏移条 ======
     if OffsetSwitch then
         if judge == 1 then
-            local offsetBastShadows = Module:Shadow(OffsetBast,TIME.OffsetShadows) --创建影子且设定存活时间为"OffsetShadows"(默认1500ms)
-            offsetBastShadows.X = -offset --使影子的x坐标位置等于击打偏移
-            offsetBastShadows:DoAlpha({start=time,finish=time+TIME.OffsetShadows,from=100,to=0}) --设置影子的存活时间以及渐入渐出效果
+            local offsetBastShadows = Module:Shadow(OffsetBast,TIME.OffsetShadows)                  --创建影子且设定存活时间为"OffsetShadows"(默认1500ms)
+            offsetBastShadows.X = -offset                                                           --使影子的x坐标位置等于击打偏移
+            offsetBastShadows:DoAlpha({start=time,finish=time+TIME.OffsetShadows,from=100,to=0})    --设置影子的显示节点以及渐出效果
         elseif judge == 2 then
             local offsetCoolShadows = Module:Shadow(OffsetCool,TIME.OffsetShadows)
             offsetCoolShadows.X = -offset
@@ -145,7 +141,7 @@ function OnHit()
     end
 
     --====== 组件动效 ======
-    if judge >=1 and judge <= 4 then
+    if judge >=1 and judge <= 4 then    --给Judge加了个小动画显得不那么死板
         JudgeUI:DoAlpha({start=time,finish=time+TIME.JudgeAlpha,from=100,to=0})
         JudgeUI:DoMoveY({start=time,finish=time+TIME.JudgeMoveY,from=240,to=245,ease=2})
     end
