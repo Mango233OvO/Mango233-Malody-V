@@ -18,6 +18,10 @@ function Init()
     CountdownText = Module:Find("StartTime")
     CountdownText.Alpha = 0
     CountdownDoAlpha = false
+
+    --====== 组件动效初始化 ======
+    JudgeUI = Module:Find("Judge")
+    JudgeUI.Alpha = 0
     
     --====== 偏移条玩家设置 ======
     OffsetSwitch = Module:GetBool("偏移指示器开关")
@@ -28,10 +32,6 @@ function Init()
 
     OffsetShadowsTimePlayer = tonumber(Module:GetString("偏移指示器阴影存活时间(ms)")) or 1500 --如果玩家键入参数错误则设置默认值1500
     OffsetTTime = tonumber(Module:GetString("偏移指示器指针移动速度(ms)")) or 500              --如果玩家键入参数错误则设置默认值500
-
-    --====== 组件动效初始化 ======
-    JudgeUI = Module:Find("Judge")
-    JudgeUI.Alpha = 0
 
     --====== 轨道缩放以及屏幕比例适配 ======
     local sceneScale = Game:SceneScale()            --获取轨道缩放
